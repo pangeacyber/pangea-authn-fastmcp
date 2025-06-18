@@ -1,0 +1,74 @@
+[project]
+name = "pangea-authn-fastmcp"
+version = "0.0.0"
+description = "Pangea AuthN integration for FastMCP"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Pangea", email = "support@pangea.cloud" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.8.1",
+    "httpx>=0.28.1",
+    "mcp>=1.9.4",
+    "pangea-sdk>=6.1.1",
+    "pydantic>=2.11.7",
+    "starlette>=0.47.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/pangeacyber/pangea-authn-fastmcp"
+Documentation = "https://github.com/pangeacyber/pangea-authn-fastmcp"
+Source = "https://github.com/pangeacyber/pangea-authn-fastmcp"
+Changelog = "https://github.com/pangeacyber/pangea-authn-fastmcp/releases"
+
+[dependency-groups]
+dev = [
+    "mypy==1.16.0",
+    "pytest==8.4.0",
+    "pytest-asyncio==1.0.0",
+    "ruff==0.11.13",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+disallow_any_generics = true
+disallow_untyped_defs = true
+follow_imports = "silent"
+no_implicit_reexport = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+addopts = "--tb=short"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+filterwarnings = ["error"]
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",   # isort
+    "PTH", # flake8-use-pathlib
+    "TC",  # flake8-type-checking
+    "UP",  # pyupgrade
+]
+flake8-type-checking.runtime-evaluated-base-classes = ["pydantic.BaseModel"]
