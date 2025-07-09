@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Protocol, TypeVar
 
-KeyT = TypeVar("KeyT", bound=str)
+KeyT = TypeVar("KeyT", bound=str, contravariant=True)
 ValueT = TypeVar("ValueT")
 
 
-class Repository[KeyT, ValueT](Protocol):
+class Repository(Protocol[KeyT, ValueT]):
     """An asynchronous key-value store."""
 
     async def get(self, key: KeyT) -> ValueT | None: ...
