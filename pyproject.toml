@@ -9,7 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "fastmcp>=2.10.2",
+    "fastmcp>=2.10.4",
     "httpx>=0.28.1",
     "mcp>=1.10.1",
     "pangea-sdk>=6.2.0",
