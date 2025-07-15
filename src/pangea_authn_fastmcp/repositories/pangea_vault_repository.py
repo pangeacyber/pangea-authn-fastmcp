@@ -18,17 +18,19 @@ class PangeaVaultRepository(Repository[str, ValueT]):
     _value_type: type[ValueT]
     _client: VaultAsync
 
-    def __init__(self, value_type: type[ValueT], pangea_vault_token: str) -> None:
+    def __init__(self, value_type: type[ValueT], pangea_vault_token: str, *, folder: str | None = None) -> None:
         """
         A key-value store that's backed by Pangea Vault.
 
         Args:
             value_type: Value type associated with this repository.
             pangea_vault_token: Pangea Vault API token.
+            folder: Folder where the items should be stored.
         """
 
         self._value_type = value_type
         self._client = VaultAsync(token=pangea_vault_token)
+        self._folder = folder
 
     @override
     async def get(self, key: str) -> ValueT | None:
@@ -49,7 +51,7 @@ class PangeaVaultRepository(Repository[str, ValueT]):
         if existing:
             await self._client.rotate_secret(existing.id, value.model_dump_json())
         else:
-            await self._client.store_secret(value.model_dump_json(), name=key)
+            await self._client.store_secret(value.model_dump_json(), name=key, folder=self._folder)
 
     @override
     async def delete(self, key: str) -> None:
@@ -61,7 +63,10 @@ class PangeaVaultRepository(Repository[str, ValueT]):
         await self._client.delete(existing.id)
 
     async def _get_vault_secret(self, key: str) -> Secret | None:
-        response = await self._client.get_bulk({"type": ItemType.SECRET, "name": key}, size=1)
+        filters: dict[str, str] = {"type": ItemType.SECRET, "name": key}
+        if self._folder:
+            filters["folder"] = self._folder
+        response = await self._client.get_bulk(filters, size=1)
 
         if not response.result:
             return None
