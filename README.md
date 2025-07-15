@@ -108,7 +108,7 @@ store these items.
 ```python
 from mcp.server.auth.provider import AccessToken, AuthorizationCode
 from mcp.shared.auth import OAuthClientInformationFull
-from pangea_authn_fastmcp import PangeaOAuthProvider, PangeaVaultRepository
+from pangea_authn_fastmcp import PangeaAccessToken, PangeaOAuthProvider, PangeaVaultRepository
 
 # Again this can come from an environment variable.
 PANGEA_VAULT_TOKEN = "pts_[...]"
@@ -120,6 +120,7 @@ oauth_provider = PangeaOAuthProvider(
     access_tokens_repository=PangeaVaultRepository(AccessToken, PANGEA_VAULT_TOKEN),
     auth_codes_repository=PangeaVaultRepository(AuthorizationCode, PANGEA_VAULT_TOKEN),
     clients_repository=PangeaVaultRepository(OAuthClientInformationFull, PANGEA_VAULT_TOKEN),
+    client_to_authn_repository=PangeaVaultRepository(PangeaAccessToken, PANGEA_VAULT_TOKEN),
 )
 ```
 
