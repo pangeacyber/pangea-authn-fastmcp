@@ -18,7 +18,7 @@ from mcp.server.auth.provider import (
     construct_redirect_uri,
 )
 from mcp.shared.auth import OAuthClientInformationFull, OAuthToken
-from pydantic import AnyHttpUrl, AnyUrl
+from pydantic import AnyHttpUrl, AnyUrl, BaseModel
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, RedirectResponse, Response
 
@@ -42,6 +42,10 @@ def sri_hash(x: str) -> str:
     return f"sha256-{b64encode(sha256(x.encode('utf-8')).digest()).decode('utf-8')}"
 
 
+class PangeaAccessToken(BaseModel):
+    token: str
+
+
 class PangeaOAuthProvider(OAuthProvider):
     """An OAuth provider that defers to Pangea AuthN for authentication."""
 
@@ -58,6 +62,7 @@ class PangeaOAuthProvider(OAuthProvider):
         access_tokens_repository: Repository[str, AccessToken] = InMemoryRepository(),
         auth_codes_repository: Repository[str, AuthorizationCode] = InMemoryRepository(),
         clients_repository: Repository[str, OAuthClientInformationFull] = InMemoryRepository(),
+        client_to_authn_repository: Repository[str, PangeaAccessToken] = InMemoryRepository(),
         # OAuthProvider kwargs.
         service_documentation_url: AnyHttpUrl | str | None = None,
         client_registration_options: ClientRegistrationOptions | None = None,
@@ -77,6 +82,7 @@ class PangeaOAuthProvider(OAuthProvider):
             access_tokens_repository: Repository for storing access tokens.
             auth_codes_repository: Repository for storing authorization codes.
             clients_repository: Repository for storing OAuth clients.
+            client_to_authn_repository: Repository for mapping MCP clients to Pangea AuthN tokens.
             service_documentation_url: URL of the service documentation.
             client_registration_options: Client registration options.
             revocation_options: Revocation options.
@@ -105,8 +111,9 @@ class PangeaOAuthProvider(OAuthProvider):
         self.access_tokens = access_tokens_repository
         self.auth_codes = auth_codes_repository
         self.clients = clients_repository
+        self.client_to_authn = client_to_authn_repository
 
-        self.state_mapping: dict[str, dict[str, str]] = {}
+        self.state_mapping: dict[str, dict[str, str | None]] = {}
 
     @override
     async def get_client(self, client_id: str) -> OAuthClientInformationFull | None:
@@ -136,6 +143,7 @@ class PangeaOAuthProvider(OAuthProvider):
             "code_challenge": params.code_challenge,
             "redirect_uri_provided_explicitly": str(params.redirect_uri_provided_explicitly),
             "redirect_uri": str(params.redirect_uri),
+            "resource": params.resource,
         }
 
         return construct_redirect_uri(
@@ -144,7 +152,7 @@ class PangeaOAuthProvider(OAuthProvider):
             redirect_uri=str(self.mcp_issuer_url).rstrip("/") + "/pangea/callback",
             response_type="code",
             state=state,
-            scope=" ".join(params.scopes or self.pangea_authn_scopes),
+            scope=" ".join(self.pangea_authn_scopes),
         )
 
     @override
@@ -265,6 +273,11 @@ class PangeaOAuthProvider(OAuthProvider):
         code_challenge = state_data["code_challenge"]
         redirect_uri_provided_explicitly = state_data["redirect_uri_provided_explicitly"] == "True"
         client_id = state_data["client_id"]
+        resource = state_data["resource"]
+
+        assert client_id
+        assert code_challenge
+        assert redirect_uri
 
         # Exchange code for token with Pangea AuthN.
         async with httpx.AsyncClient() as client:
@@ -287,7 +300,7 @@ class PangeaOAuthProvider(OAuthProvider):
             if "error" in data:
                 raise HTTPException(400, data.get("error_description", data["error"]))
 
-            pangea_token = data["access_token"]
+            pangea_token: str = data["access_token"]
 
             # Create MCP authorization code.
             mcp_auth_code = f"mcp_{token_hex(16)}"
@@ -301,19 +314,21 @@ class PangeaOAuthProvider(OAuthProvider):
                 expires_at=time.time() + 300,
                 scopes=self.mcp_scopes,
                 code_challenge=code_challenge,
+                resource=resource,
             )
             await self.auth_codes.set(mcp_auth_code, auth_code)
 
-            # Store Pangea token; the MCP token will be mapped to this later
             await self.access_tokens.set(
                 sri_hash(pangea_token),
                 AccessToken(
                     token=pangea_token,
                     client_id=client_id,
-                    scopes=[],
+                    scopes=self.pangea_authn_scopes,
                     expires_at=None,
                 ),
             )
+
+            await self.client_to_authn.set(f"client_to_authn_{client_id}", PangeaAccessToken(token=pangea_token))
 
         del self.state_mapping[state]
         return construct_redirect_uri(redirect_uri, code=mcp_auth_code, state=state)
