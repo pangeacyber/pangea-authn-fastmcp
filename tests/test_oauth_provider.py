@@ -15,7 +15,7 @@ MCP_SCOPES = ["user"]
 MCP_ISSUER_URL = "http://localhost:8000"
 
 
-def test_foo() -> None:
+def test_oauth_provider() -> None:
     oauth_provider = PangeaOAuthProvider(
         mcp_issuer_url=MCP_ISSUER_URL,
         pangea_authn_issuer_url=PANGEA_AUTHN_ISSUER_URL,
