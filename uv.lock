@@ -804,7 +804,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastmcp", specifier = ">=2.10.5" },
+    { name = "fastmcp", specifier = ">=2.10.6" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "mcp", specifier = ">=1.12.2" },
     { name = "pangea-sdk", specifier = ">=6.3.0" },
