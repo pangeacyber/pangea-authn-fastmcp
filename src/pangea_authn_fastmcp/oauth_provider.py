@@ -52,7 +52,8 @@ class PangeaOAuthProvider(OAuthProvider):
     def __init__(
         self,
         *,
-        mcp_issuer_url: AnyHttpUrl | str,
+        mcp_base_url: AnyHttpUrl | str,
+        mcp_issuer_url: AnyHttpUrl | str | None = None,
         mcp_scopes: list[str],
         pangea_authn_issuer_url: AnyHttpUrl | str,
         pangea_authn_client_id: str,
@@ -73,7 +74,8 @@ class PangeaOAuthProvider(OAuthProvider):
         An OAuth provider that defers to Pangea AuthN for authentication.
 
         Args:
-            mcp_issuer_url: URL of the MCP server.
+            mcp_base_url: Public URL of the FastMCP server.
+            mcp_issuer_url: Issuer URL for OAuth metadata (defaults to mcp_base_url).
             mcp_scopes: Scopes that are available to the MCP server.
             pangea_authn_issuer_url: Issuer URL of the Pangea AuthN project.
             pangea_authn_client_id: Pangea AuthN OAuth client ID.
@@ -90,6 +92,7 @@ class PangeaOAuthProvider(OAuthProvider):
         """
 
         super().__init__(
+            base_url=mcp_base_url,
             issuer_url=mcp_issuer_url,
             service_documentation_url=service_documentation_url,
             client_registration_options=client_registration_options,
