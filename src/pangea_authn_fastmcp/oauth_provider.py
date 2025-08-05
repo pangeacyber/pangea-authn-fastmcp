@@ -100,7 +100,6 @@ class PangeaOAuthProvider(OAuthProvider):
             required_scopes=required_scopes,
         )
 
-        self.mcp_issuer_url = mcp_issuer_url
         self.mcp_scopes = mcp_scopes
         self.pangea_issuer_url = pangea_authn_issuer_url
         self.client_id = pangea_authn_client_id
@@ -152,7 +151,7 @@ class PangeaOAuthProvider(OAuthProvider):
         return construct_redirect_uri(
             str(self.authorize_url),
             client_id=self.client_id,
-            redirect_uri=str(self.mcp_issuer_url).rstrip("/") + "/pangea/callback",
+            redirect_uri=str(self.base_url).rstrip("/") + "/pangea/callback",
             response_type="code",
             state=state,
             scope=" ".join(self.pangea_authn_scopes),
@@ -289,7 +288,7 @@ class PangeaOAuthProvider(OAuthProvider):
                 data={
                     "code": code,
                     "grant_type": "authorization_code",
-                    "redirect_uri": f"{self.mcp_issuer_url}/pangea/callback",
+                    "redirect_uri": str(self.base_url).rstrip("/") + "/pangea/callback",
                 },
                 headers={"Accept": "application/json"},
                 auth=httpx.BasicAuth(username=self.client_id, password=self.client_secret),
