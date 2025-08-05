@@ -1,6 +1,6 @@
 [project]
 name = "pangea-authn-fastmcp"
-version = "0.2.1"
+version = "0.3.0"
 description = "Pangea AuthN integration for FastMCP"
 readme = "README.md"
 license = "MIT"
