@@ -106,8 +106,10 @@ library comes with an alternative storage backend that uses [Pangea Vault][] to
 store these items.
 
 ```python
-from mcp.server.auth.provider import AccessToken, AuthorizationCode
+from fastmcp.server.auth.auth import AccessToken
+from mcp.server.auth.provider import AuthorizationCode
 from mcp.shared.auth import OAuthClientInformationFull
+
 from pangea_authn_fastmcp import PangeaAccessToken, PangeaOAuthProvider, PangeaVaultRepository
 
 # Again this can come from an environment variable.
