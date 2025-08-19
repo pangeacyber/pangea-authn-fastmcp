@@ -7,9 +7,8 @@ from secrets import token_hex, token_urlsafe
 from typing import TYPE_CHECKING, override
 
 import httpx
-from fastmcp.server.auth.auth import OAuthProvider
+from fastmcp.server.auth.auth import AccessToken, OAuthProvider
 from mcp.server.auth.provider import (
-    AccessToken,
     AuthorizationCode,
     AuthorizationParams,
     AuthorizeError,
