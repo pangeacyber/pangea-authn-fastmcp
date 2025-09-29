@@ -13,7 +13,7 @@ dependencies = [
     "httpx>=0.28.1",
     "mcp>=1.14.1",
     "pangea-sdk>=6.6.0",
-    "pydantic>=2.11.7",
+    "pydantic>=2.11.9",
     "starlette>=0.47.3",
 ]
 
