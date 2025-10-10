@@ -1040,7 +1040,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "mcp", specifier = ">=1.16.0" },
     { name = "pangea-sdk", specifier = ">=6.7.0" },
-    { name = "pydantic", specifier = ">=2.11.10" },
+    { name = "pydantic", specifier = ">=2.12.0" },
     { name = "starlette", specifier = ">=0.48.0" },
 ]
 
