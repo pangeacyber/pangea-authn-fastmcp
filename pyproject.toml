@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastmcp>=2.13.0.2",
     "httpx>=0.28.1",
-    "mcp>=1.18.0",
+    "mcp>=1.21.0",
     "pangea-sdk>=6.9.0",
     "pydantic>=2.12.3",
     "starlette>=0.48.0",
