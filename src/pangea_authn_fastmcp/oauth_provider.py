@@ -126,11 +126,17 @@ class PangeaOAuthProvider(OAuthProvider):
     async def register_client(self, client_info: OAuthClientInformationFull) -> None:
         """Register a new OAuth client."""
 
+        if not client_info.client_id:
+            raise ValueError("No client_id provided")
+
         await self.clients.set(client_info.client_id, client_info)
 
     @override
     async def authorize(self, client: OAuthClientInformationFull, params: AuthorizationParams) -> str:
         """Generate an authorization URL for the Pangea AuthN OAuth flow."""
+
+        if not client.client_id:
+            raise ValueError("No client_id provided")
 
         if not await self.clients.get(client.client_id):
             raise AuthorizeError(
@@ -183,6 +189,9 @@ class PangeaOAuthProvider(OAuthProvider):
         self, client: OAuthClientInformationFull, authorization_code: AuthorizationCode
     ) -> OAuthToken:
         """Exchange an authorization code for a token."""
+
+        if not client.client_id:
+            raise ValueError("No client_id provided")
 
         if not await self.auth_codes.get(authorization_code.code):
             raise TokenError("invalid_grant", "Authorization code not found or already used.")
