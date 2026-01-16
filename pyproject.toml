@@ -14,7 +14,7 @@ dependencies = [
     "mcp>=1.25.0",
     "pangea-sdk>=6.13.0",
     "pydantic>=2.12.5",
-    "starlette>=0.50.0",
+    "starlette>=0.51.0",
 ]
 
 [project.urls]
